@@ -7,7 +7,7 @@
 
 namespace Drupal\memcache;
 
-use Drupal\Core\Cache\Cache;
+use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\CacheTagsChecksumInterface;
 use Drupal\Core\Lock\LockBackendInterface;
@@ -245,7 +245,7 @@ class MemcacheBackend implements CacheBackendInterface {
    * {@inheritdoc}
    */
   public function invalidate($cid) {
-    $this->invalidateMultiple((array) $cid);
+    $this->invalidateMultiple([$cid]);
   }
 
   /**
@@ -257,10 +257,10 @@ class MemcacheBackend implements CacheBackendInterface {
    * @param array $cids
    *   An array of cache IDs to invalidate.
    *
-   * @see Drupal\Core\Cache\CacheBackendInterface::deleteMultiple()
-   * @see Drupal\Core\Cache\CacheBackendInterface::invalidate()
-   * @see Drupal\Core\Cache\CacheBackendInterface::invalidateTags()
-   * @see Drupal\Core\Cache\CacheBackendInterface::invalidateAll()
+   * @see \Drupal\Core\Cache\CacheBackendInterface::deleteMultiple()
+   * @see \Drupal\Core\Cache\CacheBackendInterface::invalidate()
+   * @see \Drupal\Core\Cache\CacheBackendInterface::invalidateTags()
+   * @see \Drupal\Core\Cache\CacheBackendInterface::invalidateAll()
    */
   public function invalidateMultiple(array $cids) {
     foreach ($cids as $cid) {
@@ -309,6 +309,32 @@ class MemcacheBackend implements CacheBackendInterface {
   }
 
   /**
+   * Normalizes a cache ID in order to comply with database limitations.
+   *
+   * The lock still uses the database so must comply with limitations.
+   *
+   * @param string $cid
+   *   The passed in cache ID.
+   *
+   * @return string
+   *   An ASCII-encoded cache ID that is at most 255 characters long.
+   */
+  protected function normalizeCid($cid) {
+    // Nothing to do if the ID is a US ASCII string of 255 characters or less.
+    $cid_is_ascii = mb_check_encoding($cid, 'ASCII');
+    if (strlen($cid) <= 255 && $cid_is_ascii) {
+      return $cid;
+    }
+    // Return a string that uses as much as possible of the original cache ID
+    // with the hash appended.
+    $hash = Crypt::hashBase64($cid);
+    if (!$cid_is_ascii) {
+      return $hash;
+    }
+    return substr($cid, 0, 255 - strlen($hash)) . $hash;
+  }
+
+  /**
    * Returns a cache key prefixed with the current bin.
    *
    * @param string $cid
@@ -316,7 +342,7 @@ class MemcacheBackend implements CacheBackendInterface {
    * @return string
    */
   protected function key($cid) {
-    return $this->bin . '-' . $cid;
+    return $this->normalizeCid($this->bin . '-' . $cid);
   }
 
 }
