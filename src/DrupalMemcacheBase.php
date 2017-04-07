@@ -14,6 +14,8 @@ use Psr\Log\LogLevel;
  */
 abstract class DrupalMemcacheBase implements DrupalMemcacheInterface {
 
+  use MemcacheCacheNormalizer;
+
   /**
    * The memcache config object.
    *
@@ -79,17 +81,7 @@ abstract class DrupalMemcacheBase implements DrupalMemcacheInterface {
    * {@inheritdoc}
    */
   public function key($key) {
-    $full_key = urlencode($this->prefix . '-' . $key);
-
-    // Memcache only supports key lengths up to 250 bytes.  If we have generated
-    // a longer key, we shrink it to an acceptable length with a configurable
-    // hashing algorithm. Sha1 was selected as the default as it performs
-    // quickly with minimal collisions.
-    if (strlen($full_key) > 250) {
-      $full_key = urlencode(hash($this->hashAlgorithm, $this->prefix . '-' . $key));
-    }
-
-    return $full_key;
+    return $this->normalizeKey($this->prefix . '-' . $key);
   }
 
   /**
