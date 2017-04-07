@@ -5,7 +5,7 @@ namespace Drupal\memcache;
 /**
  * Class MemcacheCacheNormalizer.
  */
-trait MemcacheCacheNormalizer {
+trait MemcacheCacheNormalizerTrait {
 
   /**
    * Normalizes a cache ID in order to comply with key length limitations.
@@ -29,6 +29,7 @@ trait MemcacheCacheNormalizer {
     // quickly with minimal collisions.
     // Return a string that uses as much as possible of the original cache ID
     // with the hash appended.
+    /** @var DrupalMemcacheConfig $this->settings */
     $hash_algorithm = $this->settings->get('key_hash_algorithm', 'sha1');
     $hash = hash($hash_algorithm, $key);
     if (!$key_is_ascii) {

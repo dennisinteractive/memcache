@@ -14,7 +14,7 @@ use Psr\Log\LogLevel;
  */
 abstract class DrupalMemcacheBase implements DrupalMemcacheInterface {
 
-  use MemcacheCacheNormalizer;
+  use MemcacheCacheNormalizerTrait;
 
   /**
    * The memcache config object.
