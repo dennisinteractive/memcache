@@ -29,7 +29,8 @@ trait MemcacheCacheNormalizer {
     // quickly with minimal collisions.
     // Return a string that uses as much as possible of the original cache ID
     // with the hash appended.
-    $hash = hash($this->hashAlgorithm, $this->prefix . '-' . $key);
+    $hash_algorithm = $this->settings->get('key_hash_algorithm', 'sha1');
+    $hash = hash($hash_algorithm, $key);
     if (!$key_is_ascii) {
       return $hash;
     }

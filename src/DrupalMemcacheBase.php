@@ -32,13 +32,6 @@ abstract class DrupalMemcacheBase implements DrupalMemcacheInterface {
   protected $memcache;
 
   /**
-   * The hash algorithm to pass to hash(). Defaults to 'sha1'
-   *
-   * @var string
-   */
-  protected $hashAlgorithm;
-
-  /**
    * The prefix memcache key for all keys.
    *
    * @var string
@@ -54,7 +47,6 @@ abstract class DrupalMemcacheBase implements DrupalMemcacheInterface {
   public function __construct(DrupalMemcacheConfig $settings) {
     $this->settings = $settings;
 
-    $this->hashAlgorithm = $this->settings->get('key_hash_algorithm', 'sha1');
     $this->prefix = $this->settings->get('key_prefix', '');
   }
 
