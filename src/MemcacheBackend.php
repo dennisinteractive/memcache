@@ -17,6 +17,8 @@ use Drupal\Core\Lock\LockBackendInterface;
  */
 class MemcacheBackend implements CacheBackendInterface {
 
+  use MemcacheCacheNormalizerTrait;
+
   /**
    * The cache bin to use.
    *
@@ -128,7 +130,7 @@ class MemcacheBackend implements CacheBackendInterface {
    * @return bool
    */
   protected function valid($cid, \stdClass $cache) {
-    $lock_key = "memcache_$cid:$this->bin";
+    $lock_key = $this->normalizeKey("memcache_$cid:$this->bin");
     $cache->valid = FALSE;
 
     if ($cache) {
@@ -316,7 +318,7 @@ class MemcacheBackend implements CacheBackendInterface {
    * @return string
    */
   protected function key($cid) {
-    return $this->bin . '-' . $cid;
+    return $this->normalizeKey($this->bin . '-' . $cid);
   }
 
 }
